@@ -176,7 +176,7 @@ class OpenWakeWord private constructor(
         processingThread = Thread({
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO)
             try {
-                initModels()
+                if (melSpecSession == null) initModels()
                 initBuffers()
                 if (!initAudioRecord()) {
                     Log.e(TAG, "Failed to initialize AudioRecord – missing RECORD_AUDIO permission?")
