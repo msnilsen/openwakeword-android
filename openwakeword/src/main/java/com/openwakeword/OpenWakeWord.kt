@@ -391,17 +391,16 @@ class OpenWakeWord private constructor(
             ).use { input ->
                 session.run(mapOf("input" to input)).use { result ->
                     val output = result[0] as OnnxTensor
-                    val shape = output.info.shape
+                    val shape = output.info.shape // [1, 1, T, 32]
                     val flat = output.floatBuffer
-                    val numFrames = shape[0].toInt()
-                    val elementsPerFrame = (shape[1] * shape[2] * shape[3]).toInt()
+                    val numFrames = shape[2].toInt()
+                    val numBins = shape[3].toInt()
 
                     ArrayList<FloatArray>(numFrames).also { frames ->
                         for (f in 0 until numFrames) {
-                            val melFrame = FloatArray(MEL_BINS)
-                            val melStart = f * elementsPerFrame + elementsPerFrame - MEL_BINS
-                            for (b in 0 until MEL_BINS) {
-                                melFrame[b] = flat.get(melStart + b) / 10.0f + 2.0f
+                            val melFrame = FloatArray(numBins)
+                            for (b in 0 until numBins) {
+                                melFrame[b] = flat.get(f * numBins + b) / 10.0f + 2.0f
                             }
                             frames.add(melFrame)
                         }
